@@ -1,0 +1,2707 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0b">
+<title>Hub Driver Finder · São Gonçalo 02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #141417;
+    --surface-2: #1c1c20;
+    --surface-3: #25252a;
+    --border: #27272a;
+    --border-strong: #3f3f46;
+    --text: #fafafa;
+    --text-muted: #a1a1aa;
+    --text-dim: #71717a;
+    --accent: #facc15;
+    --accent-dim: #ca9700;
+    --accent-soft: rgba(250, 204, 21, 0.12);
+    --green: #22c55e;
+    --green-soft: rgba(34, 197, 94, 0.15);
+    --yellow: #eab308;
+    --yellow-soft: rgba(234, 179, 8, 0.15);
+    --orange: #f97316;
+    --orange-soft: rgba(249, 115, 22, 0.15);
+    --red: #ef4444;
+    --red-soft: rgba(239, 68, 68, 0.15);
+    --blue: #3b82f6;
+    --blue-soft: rgba(59, 130, 246, 0.15);
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(250, 204, 21, 0.08), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(59, 130, 246, 0.04), transparent 50%);
+    background-attachment: fixed;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 1rem 1rem 6rem;
+  }
+
+  /* === HEADER === */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0 1.25rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #0a0a0b;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(250, 204, 21, 0.2);
+  }
+
+  .brand-text {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .brand-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.2rem;
+  }
+
+  .brand-sub {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .icon-btn:hover, .icon-btn:active {
+    border-color: var(--border-strong);
+    color: var(--text);
+    background: var(--surface-2);
+  }
+
+  /* === SETUP / UPLOAD === */
+  .setup {
+    text-align: center;
+    padding: 2rem 0.5rem 1rem;
+  }
+
+  .setup-mark {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.05);
+  }
+
+  .setup h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin-bottom: 0.625rem;
+  }
+
+  .setup-sub {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin: 0 auto 1.75rem;
+    max-width: 420px;
+  }
+
+  .upload-zone {
+    border: 2px dashed var(--border-strong);
+    border-radius: 14px;
+    padding: 2rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .upload-zone svg {
+    color: var(--text-muted);
+    margin-bottom: 0.875rem;
+  }
+
+  .upload-zone-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .upload-zone-hint {
+    color: var(--text-dim);
+    font-size: 0.8125rem;
+  }
+
+  input[type="file"] { display: none; }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.125rem;
+    margin-top: 1.25rem;
+    text-align: left;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+  }
+
+  .info-row + .info-row { border-top: 1px solid var(--border); }
+
+  .info-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .info-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    word-break: break-word;
+  }
+
+  /* === CONFIRM === */
+  .confirm-screen {
+    text-align: center;
+    padding: 2rem 0.5rem 1rem;
+  }
+
+  .stat-big {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-big-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-big-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat-mini {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.625rem;
+    text-align: center;
+  }
+
+  .stat-mini-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-mini-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* === BUTTONS === */
+  .btn {
+    background: var(--accent);
+    color: #0a0a0b;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.15s ease;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn:hover { background: #fde047; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+
+  .btn-secondary:hover { background: var(--surface-2); transform: none; }
+
+  .btn-row {
+    display: flex;
+    gap: 0.625rem;
+  }
+
+  /* === SEARCH === */
+  .search-box {
+    position: relative;
+    margin-bottom: 0.875rem;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 1rem 2.5rem 1rem 3rem;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface-2);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  .search-input::placeholder { color: var(--text-dim); }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+
+  .search-clear {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--surface-3);
+    color: var(--text-muted);
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-clear.show { display: flex; }
+  .search-clear:hover { color: var(--text); background: var(--border-strong); }
+
+  /* === FILTERS === */
+  .filter-bar {
+    display: flex;
+    gap: 0.375rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    margin: 0 -1rem 0.75rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    scrollbar-width: none;
+  }
+
+  .filter-bar::-webkit-scrollbar { display: none; }
+
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+  }
+
+  .chip:hover { border-color: var(--border-strong); color: var(--text); }
+
+  .chip.active {
+    background: var(--accent);
+    color: #0a0a0b;
+    border-color: var(--accent);
+  }
+
+  .chip-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 0.05rem 0.375rem;
+    border-radius: 999px;
+    min-width: 1.25rem;
+    text-align: center;
+  }
+
+  .chip:not(.active) .chip-count {
+    background: var(--surface-3);
+    color: var(--text-dim);
+  }
+
+  /* === RESULTS === */
+  .result-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.875rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 0.25rem;
+  }
+
+  .result-count strong { color: var(--accent); font-weight: 800; }
+
+  .result-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  /* === DRIVER CARD === */
+  .driver-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .driver-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.15s ease;
+  }
+
+  .driver-card:hover {
+    border-color: var(--border-strong);
+  }
+
+  .driver-card.open {
+    border-color: var(--accent);
+  }
+
+  .driver-head {
+    padding: 0.875rem 1rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .driver-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--surface-3);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--text);
+  }
+
+  .driver-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .driver-name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+  }
+
+  .driver-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    align-items: center;
+    margin-bottom: 0.375rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .badge.status-ativo { background: var(--green-soft); color: var(--green); }
+  .badge.status-ativo .badge-dot { background: var(--green); }
+  .badge.status-novo { background: var(--blue-soft); color: var(--blue); }
+  .badge.status-novo .badge-dot { background: var(--blue); }
+  .badge.status-risco { background: var(--orange-soft); color: var(--orange); }
+  .badge.status-risco .badge-dot { background: var(--orange); }
+  .badge.status-dormente { background: var(--yellow-soft); color: var(--yellow); }
+  .badge.status-dormente .badge-dot { background: var(--yellow); }
+  .badge.status-churn { background: var(--red-soft); color: var(--red); }
+  .badge.status-churn .badge-dot { background: var(--red); }
+
+  .badge-modal {
+    background: var(--surface-3);
+    color: var(--text-muted);
+  }
+
+  .agency-tag {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.4rem;
+    vertical-align: 2px;
+    line-height: 1.4;
+  }
+
+  .agency-tag.of {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid rgba(250, 204, 21, 0.35);
+  }
+
+  .agency-tag.trp {
+    background: var(--blue-soft);
+    color: var(--blue);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  /* === SELECT CHECKBOX ON CARD === */
+  .driver-card { position: relative; }
+
+  .driver-select {
+    position: absolute;
+    top: 0.75rem;
+    right: 2.5rem;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    background: var(--bg);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: transparent;
+    transition: all 0.15s ease;
+    z-index: 2;
+    padding: 0;
+  }
+
+  .driver-select:hover {
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  .driver-select.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0a0b;
+  }
+
+  .driver-card.selected {
+    background: linear-gradient(180deg, rgba(250, 204, 21, 0.08), var(--surface));
+    border-color: var(--accent);
+  }
+
+  /* === SELECTION BAR === */
+  .selection-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border-strong);
+    padding: 0.875rem 1rem calc(0.875rem + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    z-index: 30;
+    transform: translateY(110%);
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.5);
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .selection-bar.show { transform: translateY(0); }
+
+  .selection-clear {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border-radius: 10px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .selection-clear:hover { color: var(--red); border-color: var(--red); }
+
+  .selection-count {
+    flex: 1;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+  }
+
+  .selection-count-sub {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-top: 0.1rem;
+  }
+
+  .selection-cta {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.125rem;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+
+  .selection-cta:hover { background: #20bd5a; transform: translateY(-1px); }
+
+  /* === CAMPAIGN SCREEN === */
+  .back-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+
+  .back-btn:hover { background: var(--surface-2); }
+
+  .campaign-section { margin-bottom: 1.25rem; }
+
+  .campaign-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.625rem;
+  }
+
+  .campaign-section-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.625rem;
+  }
+
+  .text-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .text-btn:hover { background: var(--accent-soft); }
+
+  .progress-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    background: var(--surface);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  .progress-pill strong { color: var(--green); }
+
+  .template-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .campaign-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 0.875rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 90px;
+    transition: all 0.15s ease;
+  }
+
+  .campaign-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface-2);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  .campaign-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 0.75rem 0.875rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    transition: all 0.15s ease;
+  }
+
+  .campaign-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  .vars-hint {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .vars-hint code {
+    background: var(--surface-3);
+    color: var(--accent);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.15s ease;
+  }
+
+  .vars-hint code:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  /* === SEND LIST === */
+  .send-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .send-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.875rem;
+    transition: all 0.2s ease;
+  }
+
+  .send-item.sent {
+    background: var(--green-soft);
+    border-color: rgba(34, 197, 94, 0.4);
+  }
+
+  .send-num {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: var(--text-dim);
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .send-item.sent .send-num { color: var(--green); }
+
+  .send-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .send-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .send-phone {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  .send-action {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.875rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .send-action:hover { filter: brightness(1.05); transform: translateY(-1px); }
+
+  .send-action.sent {
+    background: var(--green);
+  }
+
+  .send-action.disabled {
+    background: var(--surface-3);
+    color: var(--text-dim);
+    pointer-events: none;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+
+  .preview-card {
+    background: var(--surface-2);
+    border-left: 2px solid var(--accent);
+    padding: 0.75rem 0.875rem;
+    border-radius: 0 8px 8px 0;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .preview-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.08em;
+  }
+
+  .driver-bairro-line {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .match-hl {
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 0 0.25rem;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+
+  .driver-toggle {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    transition: transform 0.2s ease;
+    display: grid;
+    place-items: center;
+  }
+
+  .driver-card.open .driver-toggle { transform: rotate(180deg); color: var(--accent); }
+
+  /* === DRIVER BODY (EXPANDED) === */
+  .driver-body {
+    display: none;
+    padding: 0 1rem 1rem;
+    border-top: 1px solid var(--border);
+    margin-top: 0;
+    padding-top: 0.875rem;
+  }
+
+  .driver-card.open .driver-body { display: block; }
+
+  .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .action-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 0.625rem 0.5rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+
+  .action-btn.primary {
+    background: var(--accent);
+    color: #0a0a0b;
+    border-color: var(--accent);
+  }
+
+  .action-btn.whatsapp {
+    background: #25D366;
+    color: #fff;
+    border-color: #25D366;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
+  .action-btn:active { transform: translateY(0); }
+
+  .driver-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .section {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .field-grid-1 { grid-template-columns: 1fr; }
+
+  .field {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 0.5rem 0.625rem;
+  }
+
+  .field-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.2rem;
+  }
+
+  .field-value {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .cluster-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .cluster-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    padding: 0.5rem 0.625rem;
+    border-radius: 8px;
+    gap: 0.5rem;
+  }
+
+  .cluster-item.match-cluster {
+    background: var(--accent-soft);
+    border: 1px solid rgba(250, 204, 21, 0.3);
+  }
+
+  .cluster-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .cluster-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .cluster-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--surface-3);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .cluster-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  .pct-green { color: var(--green); }
+  .pct-yellow { color: var(--yellow); }
+  .pct-red { color: var(--red); }
+
+  /* === EMPTY STATE === */
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    color: var(--text-dim);
+  }
+
+  .empty svg {
+    margin: 0 auto 1rem;
+    color: var(--text-dim);
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .empty-hint {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* === MENU === */
+  .sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border-strong);
+    padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 50;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .sheet.open { transform: translateY(0); }
+
+  .sheet::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 2px;
+  }
+
+  .sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 40;
+    backdrop-filter: blur(2px);
+  }
+
+  .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .sheet-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    margin-bottom: 0.875rem;
+    margin-top: 0.5rem;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 0;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item:hover { color: var(--accent); }
+  .menu-item.danger { color: var(--text); }
+  .menu-item.danger:hover { color: var(--red); }
+  .menu-item svg { flex-shrink: 0; opacity: 0.7; }
+
+  /* === TOAST === */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+
+  /* === LOADER === */
+  .loader-screen {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.25rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* === RESPONSIVE === */
+  @media (min-width: 540px) {
+    .container { padding: 1.5rem 1.5rem 6rem; }
+    .filter-bar { margin: 0 0 1rem; padding: 0 0 0.5rem; }
+    .field-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (min-width: 768px) {
+    .driver-head { padding: 1rem 1.25rem; }
+    .driver-name { font-size: 1rem; }
+    .driver-body { padding: 0 1.25rem 1.25rem; padding-top: 1rem; }
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .driver-card { animation: fadeIn 0.2s ease backwards; }
+  .driver-card:nth-child(1) { animation-delay: 0ms; }
+  .driver-card:nth-child(2) { animation-delay: 30ms; }
+  .driver-card:nth-child(3) { animation-delay: 60ms; }
+  .driver-card:nth-child(4) { animation-delay: 90ms; }
+  .driver-card:nth-child(5) { animation-delay: 120ms; }
+  .driver-card:nth-child(6) { animation-delay: 150ms; }
+  .driver-card:nth-child(n+7) { animation-delay: 180ms; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="app"></div>
+</div>
+
+<!-- Settings sheet -->
+<div class="sheet-overlay" id="sheetOverlay"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-title">Configurações</div>
+  <div class="menu-item" id="reuploadBtn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <div>
+      <div>Atualizar planilha</div>
+      <div style="font-size: 0.75rem; color: var(--text-dim); font-weight: 400; margin-top: 0.15rem;">Carregar versão mais recente</div>
+    </div>
+  </div>
+  <div class="menu-item" id="aboutBtn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <div>Sobre o app</div>
+  </div>
+  <div class="menu-item danger" id="resetBtn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    <div>Apagar todos os dados</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+
+<script>
+'use strict';
+
+// ===== CONFIG =====
+const HUB_NAME = 'LM Hub_RJ_São Gonçalo_02';
+const HUB_COLUMN_INDEX = 8; // Column I (0-indexed)
+const HUB_COLUMN_NAME_HINT = 'last_station_name';
+const HEADER_ROW_HINT = 'driver_id'; // helps detect which row is the header
+const STORAGE_KEY = 'hub_drivers_v1';
+
+const SEARCH_COLUMNS = [
+  'ultima_cluster',
+  'cluster_primaria',
+  'cluster_secundaria',
+  'clusters_realizadas',
+  'clusters_escolhidas_driver'
+];
+
+const STATUS_FILTERS = [
+  { key: 'todos', label: 'Todos' },
+  { key: 'Ativo', label: 'Ativos' },
+  { key: 'Novo', label: 'Novos' },
+  { key: 'Risco de churn', label: 'Risco' },
+  { key: 'Dormente', label: 'Dormentes' },
+  { key: 'Churn', label: 'Churn' }
+];
+
+const MESSAGE_TEMPLATES = [
+  {
+    id: 'oferta',
+    name: 'Oferta de rota',
+    text: 'Olá {NOME}, tudo bem? Tenho uma rota disponível em {BAIRRO} para agora. Pode pegar?'
+  },
+  {
+    id: 'disponibilidade',
+    name: 'Disponibilidade',
+    text: '{NOME}, tudo bem? Você está disponível para rotas hoje?'
+  },
+  {
+    id: 'confirmacao',
+    name: 'Confirmação',
+    text: '{NOME}, pode confirmar se vai pegar a rota de {BAIRRO} hoje?'
+  }
+];
+
+// ===== STATE =====
+let appData = null;
+let searchTerm = '';
+let activeStatusFilter = 'todos';
+let activeModalFilter = 'todos';
+let modalOptions = [];
+let currentScreen = 'search'; // 'search' | 'campaign'
+let selectedIds = new Set();
+let campaignState = {
+  templateId: 'oferta',
+  customMessage: null, // null = use template
+  bairro: '',
+  sentIds: new Set()
+};
+
+// ===== ELEMENTS =====
+const app = document.getElementById('app');
+const fileInput = document.getElementById('fileInput');
+const toast = document.getElementById('toast');
+const sheet = document.getElementById('sheet');
+const sheetOverlay = document.getElementById('sheetOverlay');
+
+// ===== UTILITIES =====
+function normalize(str) {
+  if (str == null) return '';
+  return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function showToast(msg, type = '') {
+  toast.textContent = msg;
+  toast.className = 'toast show ' + type;
+  setTimeout(() => { toast.className = 'toast ' + type; }, 2800);
+}
+
+function formatPhone(raw) {
+  if (raw == null || raw === '') return '';
+  let s = String(raw).replace(/\D/g, '');
+  // Handle scientific notation like "2.1977346767E10"
+  if (/[eE]/.test(String(raw))) {
+    const num = Number(raw);
+    if (!isNaN(num)) s = String(Math.round(num));
+  }
+  // Strip leading 55 country code if 13 digits
+  if (s.length === 13 && s.startsWith('55')) s = s.slice(2);
+  if (s.length === 11) {
+    return `(${s.slice(0,2)}) ${s.slice(2,7)}-${s.slice(7)}`;
+  }
+  if (s.length === 10) {
+    return `(${s.slice(0,2)}) ${s.slice(2,6)}-${s.slice(6)}`;
+  }
+  return s;
+}
+
+function getPhoneDigits(raw) {
+  if (raw == null || raw === '') return '';
+  let s = String(raw);
+  if (/[eE]/.test(s)) {
+    const num = Number(s);
+    if (!isNaN(num)) s = String(Math.round(num));
+  }
+  s = s.replace(/\D/g, '');
+  if (s.length === 13 && s.startsWith('55')) return s;
+  if (s.length === 11 || s.length === 10) return '55' + s;
+  return s;
+}
+
+function formatExcelDate(val) {
+  if (val == null || val === '') return '';
+  // SheetJS with cellDates returns Date; otherwise number
+  if (val instanceof Date && !isNaN(val)) {
+    return val.toLocaleDateString('pt-BR');
+  }
+  // Number serial
+  const num = Number(val);
+  if (!isNaN(num) && num > 25000 && num < 80000) {
+    const d = new Date(Math.round((num - 25569) * 86400 * 1000));
+    if (!isNaN(d)) return d.toLocaleDateString('pt-BR');
+  }
+  return String(val);
+}
+
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = String(name).trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function statusKey(status) {
+  const n = normalize(status);
+  if (n.includes('ativo')) return 'ativo';
+  if (n.includes('novo')) return 'novo';
+  if (n.includes('risco')) return 'risco';
+  if (n.includes('dormente')) return 'dormente';
+  if (n.includes('churn')) return 'churn';
+  return 'unknown';
+}
+
+function agencyTag(agency) {
+  if (!agency) return null;
+  const a = String(agency).trim().toUpperCase();
+  if (!a) return null;
+  if (a === 'OF') return { label: 'OF', cls: 'of', full: 'OF' };
+  return { label: 'TRP', cls: 'trp', full: a };
+}
+
+function statusOrder(status) {
+  const order = { 'Ativo': 1, 'Novo': 2, 'Risco de churn': 3, 'Dormente': 4, 'Churn': 5 };
+  return order[status] || 99;
+}
+
+// Parse cluster string like "18. Caramujo (12, 96% 🟡)" into {name, count, pct}
+function parseClusterEntry(s) {
+  if (!s) return null;
+  const m = String(s).match(/^(.+?)\s*\((\d+),\s*(\d+)%/);
+  if (m) {
+    return { name: m[1].trim(), count: parseInt(m[2]), pct: parseInt(m[3]), raw: s };
+  }
+  return { name: String(s).trim(), count: null, pct: null, raw: s };
+}
+
+function parseClusterList(s) {
+  if (!s) return [];
+  // Split on ", " but only outside parens
+  const items = [];
+  let depth = 0, start = 0;
+  const str = String(s);
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '(') depth++;
+    else if (str[i] === ')') depth--;
+    else if (depth === 0 && str[i] === ',' && str[i+1] === ' ') {
+      items.push(str.slice(start, i));
+      start = i + 2;
+      i++;
+    }
+  }
+  items.push(str.slice(start));
+  return items.map(parseClusterEntry).filter(Boolean);
+}
+
+function pctClass(pct) {
+  if (pct == null) return '';
+  if (pct >= 95) return 'pct-green';
+  if (pct >= 80) return 'pct-yellow';
+  return 'pct-red';
+}
+
+// ===== WHATSAPP / CAMPAIGN =====
+function applyMessageVars(text, driver, bairro) {
+  if (!text) return '';
+  const fullName = String(driver.driver_name || '').trim();
+  const firstName = fullName.split(/\s+/)[0] || '';
+  const titleCase = s => s ? s.toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase()) : s;
+  return String(text)
+    .replace(/\{NOME_COMPLETO\}/gi, titleCase(fullName) || 'Olá')
+    .replace(/\{NOME\}/gi, titleCase(firstName) || 'Olá')
+    .replace(/\{BAIRRO\}/gi, (bairro || '').trim() || 'sua área');
+}
+
+function buildWhatsAppUrl(driver, message) {
+  const phone = getPhoneDigits(driver.telefone);
+  if (!phone) return null;
+  const m = (message || '').trim();
+  if (!m) return `https://wa.me/${phone}`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(m)}`;
+}
+
+function getDriverId(d) {
+  return String(d.driver_id || d.driver_name || '');
+}
+
+function getActiveTemplate() {
+  return MESSAGE_TEMPLATES.find(t => t.id === campaignState.templateId) || MESSAGE_TEMPLATES[0];
+}
+
+function getCurrentMessage() {
+  if (campaignState.customMessage != null) return campaignState.customMessage;
+  return getActiveTemplate().text;
+}
+
+// ===== SELECTION =====
+function toggleSelect(driverId) {
+  const id = String(driverId);
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  renderSelectionBar();
+  const card = document.querySelector(`.driver-card[data-id="${CSS.escape(id)}"]`);
+  if (card) {
+    const sel = selectedIds.has(id);
+    card.classList.toggle('selected', sel);
+    const btn = card.querySelector('.driver-select');
+    if (btn) btn.classList.toggle('checked', sel);
+  }
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  document.querySelectorAll('.driver-card.selected').forEach(c => {
+    c.classList.remove('selected');
+    const btn = c.querySelector('.driver-select');
+    if (btn) btn.classList.remove('checked');
+  });
+  renderSelectionBar();
+}
+
+function openCampaign() {
+  if (selectedIds.size === 0) return;
+  campaignState.bairro = searchTerm.trim();
+  campaignState.sentIds = new Set();
+  campaignState.customMessage = null;
+  currentScreen = 'campaign';
+  window.scrollTo(0, 0);
+  renderCampaign();
+}
+
+function closeCampaign() {
+  currentScreen = 'search';
+  renderSearch();
+}
+
+
+async function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      appData = JSON.parse(raw);
+      return true;
+    }
+  } catch (e) { /* not found or parse error */ }
+  return false;
+}
+
+async function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    return true;
+  } catch (e) {
+    showToast('Erro ao salvar — armazenamento cheio?', 'error');
+    return false;
+  }
+}
+
+async function clearStorage() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  appData = null;
+}
+
+// ===== FILE PARSING =====
+function parseFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', blankrows: false });
+        if (rows.length < 2) {
+          reject(new Error('Planilha vazia'));
+          return;
+        }
+        resolve(rows);
+      } catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// Find header row by looking for "driver_id" or similar
+function findHeaderRow(rows) {
+  for (let i = 0; i < Math.min(5, rows.length); i++) {
+    const row = rows[i];
+    if (row.some(c => normalize(c) === HEADER_ROW_HINT) ||
+        row.some(c => normalize(c) === normalize(HUB_COLUMN_NAME_HINT))) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+function processRows(rows) {
+  const headerIdx = findHeaderRow(rows);
+  const headers = rows[headerIdx].map((h, i) => {
+    const t = String(h || '').trim();
+    return t || `col_${i}`;
+  });
+  const dataRows = rows.slice(headerIdx + 1);
+
+  // Find hub column - prefer name match, fall back to index 8
+  let hubCol = headers.indexOf(HUB_COLUMN_NAME_HINT);
+  if (hubCol === -1) hubCol = HUB_COLUMN_INDEX;
+
+  // Filter to user's hub
+  const filtered = dataRows.filter(row => {
+    const v = row[hubCol];
+    return v && normalize(v) === normalize(HUB_NAME);
+  });
+
+  // Convert to objects
+  const drivers = filtered.map(row => {
+    const obj = {};
+    headers.forEach((h, i) => {
+      let v = row[i];
+      if (v instanceof Date) {
+        v = v.toLocaleDateString('pt-BR');
+      } else if (v == null) {
+        v = '';
+      }
+      obj[h] = v;
+    });
+    return obj;
+  });
+
+  return {
+    drivers,
+    headers,
+    hubCol: headers[hubCol] || HUB_COLUMN_NAME_HINT,
+    totalRows: dataRows.length
+  };
+}
+
+// ===== HANDLERS =====
+async function handleFile(file) {
+  if (!file) return;
+  app.innerHTML = `
+    <div class="loader-screen">
+      <div class="spinner"></div>
+      <div style="font-weight: 600; color: var(--text-muted);">Lendo planilha...</div>
+    </div>
+  `;
+  try {
+    const rows = await parseFile(file);
+    const processed = processRows(rows);
+    if (processed.drivers.length === 0) {
+      showToast('Nenhum motorista encontrado no hub', 'error');
+      renderUpload();
+      return;
+    }
+    renderConfirm(processed);
+  } catch (err) {
+    console.error(err);
+    showToast('Erro: ' + err.message, 'error');
+    renderUpload();
+  }
+}
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+  fileInput.value = '';
+});
+
+// ===== RENDER: UPLOAD =====
+function renderUpload() {
+  app.innerHTML = `
+    <div class="setup">
+      <div class="setup-mark">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/>
+        </svg>
+      </div>
+      <h1>Buscador de Motoristas</h1>
+      <p class="setup-sub">Carregue sua planilha de motoristas. O app vai filtrar apenas o seu hub e salvar os dados aqui no navegador para buscas rápidas em campo.</p>
+
+      <div class="upload-zone" id="uploadZone">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <div class="upload-zone-title">Toque para carregar planilha</div>
+        <div class="upload-zone-hint">.xlsx, .xls ou .csv</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <div class="info-label">HUB</div>
+          <div class="info-value mono" style="font-size: 0.75rem;">${escapeHtml(HUB_NAME)}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">COLUNA HUB</div>
+          <div class="info-value mono">I · last_station_name</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">BUSCA</div>
+          <div class="info-value" style="font-size: 0.75rem;">Em 5 colunas de cluster</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('click', () => fileInput.click());
+  ['dragover','dragenter'].forEach(evt => {
+    zone.addEventListener(evt, e => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+  });
+  ['dragleave','drop'].forEach(evt => {
+    zone.addEventListener(evt, e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+    });
+  });
+  zone.addEventListener('drop', e => {
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+}
+
+// ===== RENDER: CONFIRM =====
+function renderConfirm(processed) {
+  // Count statuses
+  const statusCounts = {};
+  processed.drivers.forEach(d => {
+    const s = d.status || 'Indefinido';
+    statusCounts[s] = (statusCounts[s] || 0) + 1;
+  });
+
+  const statusList = ['Ativo', 'Novo', 'Risco de churn', 'Dormente', 'Churn']
+    .filter(s => statusCounts[s])
+    .map(s => `
+      <div class="stat-mini">
+        <div class="stat-mini-num" style="color: var(--${
+          s === 'Ativo' ? 'green' : s === 'Novo' ? 'blue' : s === 'Risco de churn' ? 'orange' : s === 'Dormente' ? 'yellow' : 'red'
+        });">${statusCounts[s]}</div>
+        <div class="stat-mini-label">${s === 'Risco de churn' ? 'Risco' : s}</div>
+      </div>
+    `).join('');
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="brand">
+        <div class="brand-mark">SG</div>
+        <div class="brand-text">
+          <div class="brand-title">Confirmar</div>
+          <div class="brand-sub">Última etapa</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="confirm-screen">
+      <div class="stat-big">
+        <div class="stat-big-num">${processed.drivers.length}</div>
+        <div class="stat-big-label">motoristas no seu hub</div>
+      </div>
+
+      <div class="stat-row">${statusList}</div>
+
+      <div class="info-card" style="margin-bottom: 1.25rem;">
+        <div class="info-row">
+          <div class="info-label">HUB</div>
+          <div class="info-value mono" style="font-size: 0.75rem;">São Gonçalo 02</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">FILTRADO</div>
+          <div class="info-value">${processed.drivers.length} de ${processed.totalRows} linhas</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">COLUNAS</div>
+          <div class="info-value">${processed.headers.length}</div>
+        </div>
+      </div>
+
+      <button class="btn" id="goBtn">
+        Salvar e começar a buscar
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  `;
+
+  document.getElementById('goBtn').addEventListener('click', async () => {
+    appData = {
+      drivers: processed.drivers,
+      headers: processed.headers,
+      hubCol: processed.hubCol,
+      uploadedAt: new Date().toISOString()
+    };
+    const ok = await saveData();
+    if (ok) {
+      showToast('Tudo pronto! 🚀', 'success');
+      computeModalOptions();
+      renderSearch();
+    }
+  });
+}
+
+// ===== COMPUTED =====
+function computeModalOptions() {
+  if (!appData) return;
+  const counts = {};
+  appData.drivers.forEach(d => {
+    const m = d.modal;
+    if (m && String(m).trim()) {
+      const k = String(m).trim();
+      counts[k] = (counts[k] || 0) + 1;
+    }
+  });
+  modalOptions = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([m, c]) => ({ key: m, label: m, count: c }));
+}
+
+// ===== SEARCH LOGIC =====
+function searchDrivers() {
+  if (!appData) return [];
+  const term = normalize(searchTerm);
+  let results = appData.drivers;
+
+  // Status filter
+  if (activeStatusFilter !== 'todos') {
+    results = results.filter(d => d.status === activeStatusFilter);
+  }
+
+  // Modal filter
+  if (activeModalFilter !== 'todos') {
+    results = results.filter(d => String(d.modal || '').trim() === activeModalFilter);
+  }
+
+  // Search
+  if (term) {
+    results = results
+      .map(d => {
+        let bestPct = -1;
+        let bestCount = 0;
+        let matched = false;
+        for (const col of SEARCH_COLUMNS) {
+          const v = d[col];
+          if (!v) continue;
+          const nv = normalize(v);
+          if (nv.includes(term)) {
+            matched = true;
+            // Try to extract pct/count from clusters_realizadas for matching cluster
+            if (col === 'clusters_realizadas') {
+              const clusters = parseClusterList(v);
+              for (const c of clusters) {
+                if (normalize(c.name).includes(term)) {
+                  if (c.pct != null && c.pct > bestPct) bestPct = c.pct;
+                  if (c.count != null) bestCount = Math.max(bestCount, c.count);
+                }
+              }
+            }
+          }
+        }
+        if (!matched) return null;
+        return { driver: d, bestPct, bestCount };
+      })
+      .filter(Boolean);
+
+    // Sort: Active first, then by pct desc, then by count desc as tiebreaker
+    results.sort((a, b) => {
+      const sA = statusOrder(a.driver.status);
+      const sB = statusOrder(b.driver.status);
+      if (sA !== sB) return sA - sB;
+      if (b.bestPct !== a.bestPct) return b.bestPct - a.bestPct;
+      return b.bestCount - a.bestCount;
+    });
+
+    return results.map(r => r.driver);
+  }
+
+  // No search term: just sort by status
+  return [...results].sort((a, b) => statusOrder(a.status) - statusOrder(b.status));
+}
+
+// ===== HIGHLIGHT =====
+function highlightMatch(text, term) {
+  if (!term || !text) return escapeHtml(text || '');
+  const original = String(text);
+  const normTerm = normalize(term);
+  if (!normTerm) return escapeHtml(original);
+  const normText = normalize(original);
+  if (!normText.includes(normTerm)) return escapeHtml(original);
+
+  // Find all occurrences in original by walking
+  const result = [];
+  let i = 0;
+  while (i < original.length) {
+    // Try to find match starting at i
+    let found = false;
+    for (let len = normTerm.length; len <= normTerm.length + 4 && i + len <= original.length; len++) {
+      const slice = original.substr(i, len);
+      if (normalize(slice) === normTerm) {
+        result.push('<span class="match-hl">' + escapeHtml(slice) + '</span>');
+        i += len;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      result.push(escapeHtml(original[i]));
+      i++;
+    }
+  }
+  return result.join('');
+}
+
+// ===== RENDER: SEARCH =====
+function renderSearch() {
+  const totalDrivers = appData.drivers.length;
+  const activeCount = appData.drivers.filter(d => d.status === 'Ativo').length;
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="brand">
+        <div class="brand-mark">SG</div>
+        <div class="brand-text">
+          <div class="brand-title">RJ · São Gonçalo 02</div>
+          <div class="brand-sub mono" style="font-size: 0.8125rem;">${totalDrivers} motoristas · ${activeCount} ativos</div>
+        </div>
+      </div>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" class="search-input" id="searchInput"
+             placeholder="Buscar bairro (ex: Caramujo)"
+             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="search-clear" id="searchClear" aria-label="Limpar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="filter-bar" id="statusFilters"></div>
+    <div class="filter-bar" id="modalFilters"></div>
+
+    <div class="result-meta">
+      <div class="result-count" id="resultCount">—</div>
+      <div class="result-sort">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+        <span>Maior % primeiro</span>
+      </div>
+    </div>
+
+    <div id="results"></div>
+  `;
+
+  const input = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('searchClear');
+
+  input.addEventListener('input', e => {
+    searchTerm = e.target.value;
+    clearBtn.classList.toggle('show', !!searchTerm);
+    renderResults();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    searchTerm = '';
+    input.value = '';
+    clearBtn.classList.remove('show');
+    input.focus();
+    renderResults();
+  });
+
+  document.getElementById('menuBtn').addEventListener('click', openSheet);
+
+  renderFilters();
+  renderResults();
+  setTimeout(() => input.focus(), 100);
+}
+
+function renderFilters() {
+  // Status filters
+  const statusEl = document.getElementById('statusFilters');
+  const statusCounts = { todos: appData.drivers.length };
+  appData.drivers.forEach(d => {
+    statusCounts[d.status] = (statusCounts[d.status] || 0) + 1;
+  });
+
+  statusEl.innerHTML = STATUS_FILTERS
+    .filter(f => f.key === 'todos' || statusCounts[f.key])
+    .map(f => `
+      <button class="chip ${activeStatusFilter === f.key ? 'active' : ''}" data-status="${f.key}">
+        ${f.label}
+        <span class="chip-count">${statusCounts[f.key] || 0}</span>
+      </button>
+    `).join('');
+
+  statusEl.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      activeStatusFilter = chip.dataset.status;
+      renderFilters();
+      renderResults();
+    });
+  });
+
+  // Modal filters
+  const modalEl = document.getElementById('modalFilters');
+  if (modalOptions.length === 0) {
+    modalEl.style.display = 'none';
+    return;
+  }
+
+  const allModalChips = [
+    { key: 'todos', label: 'Todos modais', count: appData.drivers.length },
+    ...modalOptions
+  ];
+
+  modalEl.innerHTML = allModalChips.map(f => `
+    <button class="chip ${activeModalFilter === f.key ? 'active' : ''}" data-modal="${escapeHtml(f.key)}">
+      ${escapeHtml(f.label)}
+      <span class="chip-count">${f.count}</span>
+    </button>
+  `).join('');
+
+  modalEl.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      activeModalFilter = chip.dataset.modal;
+      renderFilters();
+      renderResults();
+    });
+  });
+}
+
+function renderResults() {
+  const resultsEl = document.getElementById('results');
+  const countEl = document.getElementById('resultCount');
+  const matches = searchDrivers();
+
+  if (searchTerm.trim()) {
+    countEl.innerHTML = `<strong>${matches.length}</strong> resultado${matches.length === 1 ? '' : 's'}`;
+  } else {
+    countEl.innerHTML = `<strong>${matches.length}</strong> motorista${matches.length === 1 ? '' : 's'}`;
+  }
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = `
+      <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <div class="empty-title">Nenhum motorista encontrado</div>
+        <div class="empty-hint">${searchTerm ? 'Tente outro bairro ou ajuste os filtros' : 'Ajuste os filtros para ver resultados'}</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Limit initial render to 50 for performance, but show count
+  const MAX = 100;
+  const toShow = matches.slice(0, MAX);
+
+  resultsEl.innerHTML = `
+    <div class="driver-list">
+      ${toShow.map((d, idx) => renderDriverCard(d, idx)).join('')}
+    </div>
+    ${matches.length > MAX ? `
+      <div class="empty" style="padding: 1.5rem 1rem;">
+        <div class="empty-hint">Mostrando ${MAX} de ${matches.length}. Refine a busca para ver mais.</div>
+      </div>
+    ` : ''}
+  `;
+
+  // Attach click handlers
+  resultsEl.querySelectorAll('.driver-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const card = head.closest('.driver-card');
+      card.classList.toggle('open');
+    });
+  });
+
+  // Attach select handlers (stop propagation so it doesn't toggle the card)
+  resultsEl.querySelectorAll('.driver-select').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      toggleSelect(btn.dataset.selectId);
+    });
+  });
+
+  renderSelectionBar();
+}
+
+function renderSelectionBar() {
+  let bar = document.getElementById('selectionBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'selectionBar';
+    bar.className = 'selection-bar';
+    document.body.appendChild(bar);
+  }
+
+  const n = selectedIds.size;
+  if (n === 0 || currentScreen !== 'search') {
+    bar.classList.remove('show');
+    return;
+  }
+
+  bar.innerHTML = `
+    <button class="selection-clear" id="selBarClear" aria-label="Limpar seleção">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="selection-count">
+      ${n} selecionado${n > 1 ? 's' : ''}
+      <div class="selection-count-sub">${searchTerm ? `Para: ${escapeHtml(searchTerm)}` : 'Sem bairro definido'}</div>
+    </div>
+    <button class="selection-cta" id="selBarSend">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
+      Disparar
+    </button>
+  `;
+  bar.classList.add('show');
+
+  document.getElementById('selBarClear').addEventListener('click', clearSelection);
+  document.getElementById('selBarSend').addEventListener('click', openCampaign);
+}
+
+function renderDriverCard(d, idx) {
+  const name = d.driver_name || '(Sem nome)';
+  const status = d.status || '—';
+  const modal = d.modal || '';
+  const sk = statusKey(status);
+  const agency = agencyTag(d.actual_agency_name);
+  const phoneDigits = getPhoneDigits(d.telefone);
+  const phoneStr = formatPhone(d.telefone);
+  const driverId = getDriverId(d);
+  const isSelected = selectedIds.has(driverId);
+
+  // Build bairro line - show what matched
+  let bairroLine = '';
+  if (d.ultima_cluster) bairroLine = highlightMatch(d.ultima_cluster, searchTerm);
+  if (d.cluster_primaria && d.cluster_primaria !== d.ultima_cluster) {
+    bairroLine += (bairroLine ? ' · ' : '') + highlightMatch(d.cluster_primaria, searchTerm);
+  }
+  if (d.cluster_secundaria) {
+    bairroLine += (bairroLine ? ' · ' : '') + highlightMatch(d.cluster_secundaria, searchTerm);
+  }
+  if (!bairroLine) bairroLine = '<span style="color: var(--text-dim);">Sem cluster definido</span>';
+
+  // Parse all clusters realizadas to show stats
+  const allClusters = parseClusterList(d.clusters_realizadas);
+  const term = normalize(searchTerm);
+  const matchingClusters = term
+    ? allClusters.filter(c => normalize(c.name).includes(term))
+    : [];
+  const otherClusters = term
+    ? allClusters.filter(c => !normalize(c.name).includes(term)).slice(0, 6)
+    : allClusters.slice(0, 8);
+
+  return `
+    <div class="driver-card ${isSelected ? 'selected' : ''}" data-idx="${idx}" data-id="${escapeHtml(driverId)}">
+      <button class="driver-select ${isSelected ? 'checked' : ''}" data-select-id="${escapeHtml(driverId)}" aria-label="Selecionar para WhatsApp">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <div class="driver-head">
+        <div class="driver-avatar">${getInitials(name)}</div>
+        <div class="driver-info">
+          <div class="driver-name">${escapeHtml(name)}${agency ? `<span class="agency-tag ${agency.cls}" title="${escapeHtml(agency.full)}">${agency.label}</span>` : ''}</div>
+          <div class="driver-meta">
+            <span class="badge status-${sk}">
+              <span class="badge-dot"></span>
+              ${escapeHtml(status)}
+            </span>
+            ${modal ? `<span class="badge badge-modal">${escapeHtml(modal)}</span>` : ''}
+          </div>
+          <div class="driver-bairro-line">${bairroLine}</div>
+        </div>
+        <div class="driver-toggle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="driver-body">
+        ${phoneDigits ? `
+          <div class="action-row">
+            <a href="tel:+${phoneDigits}" class="action-btn primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Ligar
+            </a>
+            <a href="https://wa.me/${phoneDigits}" target="_blank" rel="noopener" class="action-btn whatsapp">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
+              WhatsApp
+            </a>
+          </div>
+        ` : ''}
+
+        <div class="driver-sections">
+          <div class="section">
+            <div class="section-title">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Cluster
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">Última</div>
+                <div class="field-value">${escapeHtml(d.ultima_cluster || '—')}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Primária</div>
+                <div class="field-value">${escapeHtml(d.cluster_primaria || '—')}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Secundária</div>
+                <div class="field-value">${escapeHtml(d.cluster_secundaria || '—')}</div>
+              </div>
+            </div>
+          </div>
+
+          ${matchingClusters.length > 0 ? `
+            <div class="section">
+              <div class="section-title" style="color: var(--accent);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Atende "${escapeHtml(searchTerm)}" (${matchingClusters.length})
+              </div>
+              <div class="cluster-list">
+                ${matchingClusters.map(c => `
+                  <div class="cluster-item match-cluster">
+                    <div class="cluster-name">${highlightMatch(c.name, searchTerm)}</div>
+                    <div class="cluster-stats">
+                      ${c.count != null ? `<span class="cluster-count">${c.count}x</span>` : ''}
+                      ${c.pct != null ? `<span class="cluster-pct ${pctClass(c.pct)}">${c.pct}%</span>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${otherClusters.length > 0 ? `
+            <div class="section">
+              <div class="section-title">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                ${term ? 'Outros clusters' : 'Clusters realizados'}
+              </div>
+              <div class="cluster-list">
+                ${otherClusters.map(c => `
+                  <div class="cluster-item">
+                    <div class="cluster-name">${escapeHtml(c.name)}</div>
+                    <div class="cluster-stats">
+                      ${c.count != null ? `<span class="cluster-count">${c.count}x</span>` : ''}
+                      ${c.pct != null ? `<span class="cluster-pct ${pctClass(c.pct)}">${c.pct}%</span>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="section">
+            <div class="section-title">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h4M6 12h4M10 16h4"/></svg>
+              Dados
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">Telefone</div>
+                <div class="field-value mono">${phoneStr || '—'}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Agência</div>
+                <div class="field-value">${escapeHtml(d.actual_agency_name || '—')}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Modal</div>
+                <div class="field-value">${escapeHtml(d.modal || '—')}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">ID</div>
+                <div class="field-value mono">${escapeHtml(d.driver_id || '—')}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Última rota</div>
+                <div class="field-value">${formatExcelDate(d.Data_Ultima_Rota) || '—'}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Conf./Decl.</div>
+                <div class="field-value mono">
+                  <span style="color: var(--green);">${d.qtd_confirmacoes_desde_ultima_rota || 0}</span>
+                  /
+                  <span style="color: var(--red);">${d.qtd_declinio_desde_ultima_rota || 0}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20"/></svg>
+              Atividade (qtd rotas)
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">0-7 dias</div>
+                <div class="field-value mono" style="color: var(--green);">${d.qtd_at_0_7 || 0}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">8-15 dias</div>
+                <div class="field-value mono">${d.qtd_at_8_15 || 0}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">16-30 dias</div>
+                <div class="field-value mono">${d.qtd_at_16_30 || 0}</div>
+              </div>
+              <div class="field">
+                <div class="field-label">31-90 dias</div>
+                <div class="field-value mono" style="color: var(--text-dim);">${d.qtd_at_31_90 || 0}</div>
+              </div>
+            </div>
+          </div>
+
+          ${d['Drivers em Rota'] || d['Drivers OnHold'] ? `
+            <div class="section">
+              <div class="section-title">Status atual</div>
+              <div class="field-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="field">
+                  <div class="field-label">Em rota</div>
+                  <div class="field-value">${escapeHtml(d['Drivers em Rota'] || '—')}</div>
+                </div>
+                <div class="field">
+                  <div class="field-label">OnHold</div>
+                  <div class="field-value">${escapeHtml(d['Drivers OnHold'] || '—')}</div>
+                </div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== RENDER: CAMPAIGN (DISPARO WHATSAPP) =====
+function renderCampaign() {
+  // Hide selection bar while in campaign
+  const bar = document.getElementById('selectionBar');
+  if (bar) bar.classList.remove('show');
+
+  const drivers = appData.drivers.filter(d => selectedIds.has(getDriverId(d)));
+  if (drivers.length === 0) {
+    closeCampaign();
+    return;
+  }
+
+  // Sort drivers same way they appear in results (by status, then alphabetical)
+  drivers.sort((a, b) => {
+    const sA = statusOrder(a.status);
+    const sB = statusOrder(b.status);
+    if (sA !== sB) return sA - sB;
+    return String(a.driver_name || '').localeCompare(String(b.driver_name || ''));
+  });
+
+  const tpl = getActiveTemplate();
+  const message = getCurrentMessage();
+  const sentCount = campaignState.sentIds.size;
+
+  app.innerHTML = `
+    <div class="header">
+      <button class="back-btn" id="campaignBack" aria-label="Voltar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+      <div class="brand" style="flex: 1;">
+        <div class="brand-mark" style="background: linear-gradient(135deg, #25D366, #128C7E); color: white;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">Disparo WhatsApp</div>
+          <div class="brand-sub">${drivers.length} motorista${drivers.length > 1 ? 's' : ''}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="campaign-section">
+      <div class="campaign-section-title">Modelo de mensagem</div>
+      <div class="template-chips" id="tplChips">
+        ${MESSAGE_TEMPLATES.map(t => `
+          <button class="chip ${t.id === campaignState.templateId ? 'active' : ''}" data-tpl-id="${escapeHtml(t.id)}">
+            ${escapeHtml(t.name)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="campaign-section">
+      <div class="campaign-section-row">
+        <div class="campaign-section-title">Bairro</div>
+      </div>
+      <input type="text" class="campaign-input" id="bairroInput" value="${escapeHtml(campaignState.bairro)}" placeholder="ex: Caramujo">
+    </div>
+
+    <div class="campaign-section">
+      <div class="campaign-section-row">
+        <div class="campaign-section-title">Mensagem</div>
+        ${campaignState.customMessage != null ? `<button class="text-btn" id="resetMsg">↺ Restaurar modelo</button>` : ''}
+      </div>
+      <textarea class="campaign-textarea" id="msgInput" rows="4" placeholder="Sua mensagem...">${escapeHtml(message)}</textarea>
+      <div class="vars-hint">
+        <span>Variáveis:</span>
+        <code data-var="{NOME}">{NOME}</code>
+        <code data-var="{BAIRRO}">{BAIRRO}</code>
+      </div>
+      <div class="preview-card" id="msgPreview">
+        <div class="preview-label">Preview · ${escapeHtml(drivers[0].driver_name || '')}</div>
+        <div id="msgPreviewText">${escapeHtml(applyMessageVars(message, drivers[0], campaignState.bairro))}</div>
+      </div>
+    </div>
+
+    <div class="campaign-section">
+      <div class="campaign-section-row">
+        <div class="campaign-section-title">Disparos</div>
+        <div class="progress-pill"><strong>${sentCount}</strong>/${drivers.length} enviados</div>
+      </div>
+      <div class="send-list" id="sendList">
+        ${drivers.map((d, i) => renderSendItem(d, i)).join('')}
+      </div>
+    </div>
+  `;
+
+  // Handlers
+  document.getElementById('campaignBack').addEventListener('click', closeCampaign);
+
+  document.querySelectorAll('[data-tpl-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      campaignState.templateId = btn.dataset.tplId;
+      campaignState.customMessage = null;
+      renderCampaign();
+    });
+  });
+
+  const msgInput = document.getElementById('msgInput');
+  msgInput.addEventListener('input', e => {
+    campaignState.customMessage = e.target.value;
+    updateCampaignPreviewAndList();
+    // Show "restaurar" button if not already shown
+    const row = msgInput.closest('.campaign-section').querySelector('.campaign-section-row');
+    if (!row.querySelector('#resetMsg')) {
+      const b = document.createElement('button');
+      b.className = 'text-btn';
+      b.id = 'resetMsg';
+      b.textContent = '↺ Restaurar modelo';
+      b.addEventListener('click', resetMessage);
+      row.appendChild(b);
+    }
+  });
+
+  const bairroInput = document.getElementById('bairroInput');
+  bairroInput.addEventListener('input', e => {
+    campaignState.bairro = e.target.value;
+    updateCampaignPreviewAndList();
+  });
+
+  const resetBtn = document.getElementById('resetMsg');
+  if (resetBtn) resetBtn.addEventListener('click', resetMessage);
+
+  // Variables click-to-insert
+  document.querySelectorAll('[data-var]').forEach(el => {
+    el.addEventListener('click', () => {
+      const v = el.dataset.var;
+      const ta = document.getElementById('msgInput');
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const val = ta.value;
+      ta.value = val.slice(0, start) + v + val.slice(end);
+      ta.focus();
+      ta.setSelectionRange(start + v.length, start + v.length);
+      campaignState.customMessage = ta.value;
+      updateCampaignPreviewAndList();
+    });
+  });
+
+  attachSendHandlers(drivers);
+}
+
+function resetMessage() {
+  campaignState.customMessage = null;
+  renderCampaign();
+}
+
+function renderSendItem(d, i) {
+  const driverId = getDriverId(d);
+  const sent = campaignState.sentIds.has(driverId);
+  const message = applyMessageVars(getCurrentMessage(), d, campaignState.bairro);
+  const phone = formatPhone(d.telefone);
+  const url = buildWhatsAppUrl(d, message);
+
+  return `
+    <div class="send-item ${sent ? 'sent' : ''}" data-id="${escapeHtml(driverId)}">
+      <div class="send-num mono">${String(i + 1).padStart(2, '0')}</div>
+      <div class="send-info">
+        <div class="send-name">${escapeHtml(d.driver_name || '—')}</div>
+        <div class="send-phone mono">${phone || 'sem telefone'}</div>
+      </div>
+      ${url ? `
+        <a href="${url}" target="_blank" rel="noopener" class="send-action ${sent ? 'sent' : ''}" data-driver-id="${escapeHtml(driverId)}">
+          ${sent ? `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Enviado
+          ` : `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
+            Enviar
+          `}
+        </a>
+      ` : `<span class="send-action disabled">sem fone</span>`}
+    </div>
+  `;
+}
+
+function attachSendHandlers(drivers) {
+  document.querySelectorAll('.send-action[data-driver-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.driverId;
+      // Mark as sent after a short delay (so the click navigates first)
+      setTimeout(() => {
+        campaignState.sentIds.add(id);
+        updateCampaignPreviewAndList();
+      }, 400);
+    });
+  });
+}
+
+function updateCampaignPreviewAndList() {
+  const drivers = appData.drivers.filter(d => selectedIds.has(getDriverId(d)));
+  drivers.sort((a, b) => {
+    const sA = statusOrder(a.status);
+    const sB = statusOrder(b.status);
+    if (sA !== sB) return sA - sB;
+    return String(a.driver_name || '').localeCompare(String(b.driver_name || ''));
+  });
+
+  // Update preview
+  const preview = document.getElementById('msgPreviewText');
+  if (preview && drivers.length) {
+    preview.textContent = applyMessageVars(getCurrentMessage(), drivers[0], campaignState.bairro);
+  }
+
+  // Update send list
+  const list = document.getElementById('sendList');
+  if (list) {
+    list.innerHTML = drivers.map((d, i) => renderSendItem(d, i)).join('');
+    attachSendHandlers(drivers);
+  }
+
+  // Update progress pill
+  const pill = document.querySelector('.progress-pill');
+  if (pill) pill.innerHTML = `<strong>${campaignState.sentIds.size}</strong>/${drivers.length} enviados`;
+}
+
+
+function openSheet() {
+  sheet.classList.add('open');
+  sheetOverlay.classList.add('open');
+}
+function closeSheet() {
+  sheet.classList.remove('open');
+  sheetOverlay.classList.remove('open');
+}
+
+sheetOverlay.addEventListener('click', closeSheet);
+
+document.getElementById('reuploadBtn').addEventListener('click', () => {
+  closeSheet();
+  fileInput.click();
+});
+
+document.getElementById('aboutBtn').addEventListener('click', () => {
+  closeSheet();
+  const u = appData?.uploadedAt ? new Date(appData.uploadedAt).toLocaleString('pt-BR') : '—';
+  showToast(`Última atualização: ${u}`);
+});
+
+document.getElementById('resetBtn').addEventListener('click', async () => {
+  if (!confirm('Apagar todos os dados salvos? Você precisará carregar a planilha novamente.')) return;
+  closeSheet();
+  await clearStorage();
+  appData = null;
+  renderUpload();
+  showToast('Dados apagados', 'success');
+});
+
+// ===== INIT =====
+(async () => {
+  const has = await loadData();
+  if (has && appData?.drivers?.length) {
+    computeModalOptions();
+    renderSearch();
+  } else {
+    renderUpload();
+  }
+})();
+</script>
+</body>
+</html>
