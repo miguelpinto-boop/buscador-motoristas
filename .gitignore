@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.pyc
+
+# Artefatos do Memecoin Miner Lite (gerados em tempo de execução)
+miner.log
+miner_config.json
+xmrig
+xmrig.exe
