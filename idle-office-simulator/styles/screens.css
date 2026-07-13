@@ -1,0 +1,312 @@
+/* Telas específicas — Prédio, Mapa, Contratos, Equipe, Sede, Metas, Mais */
+
+/* ————— Tela Prédio (PRD §21.3) ————— */
+
+.property-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(135deg, var(--surface-2), var(--surface));
+}
+.property-banner .ico { font-size: 1.9rem; }
+.property-banner h2 { font-size: 1.02rem; }
+
+/* Identidade visual por propriedade (PRD §29.1) */
+.theme-aurora .property-banner { background: linear-gradient(135deg, #2a2f1d, #1a2338); border-color: #6b6b2e; }
+.theme-torre .property-banner { background: linear-gradient(135deg, #14293f, #1a2338); border-color: #2e5d8a; }
+.theme-campus .property-banner { background: linear-gradient(135deg, #14322a, #1a2338); border-color: #2e8a62; }
+
+.work-btn {
+  width: 100%;
+  min-height: 58px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #201700;
+  font-size: 1.05rem;
+  font-weight: 800;
+  border: none;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 18px rgba(255, 170, 0, 0.25);
+  transition: transform 0.08s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+.work-btn:active { transform: scale(0.97); }
+
+.buymode-row { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+.buymode-row .label { font-size: 0.72rem; color: var(--text-dim); font-weight: 700; }
+.buymode { padding: 6px 13px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); font-size: 0.78rem; font-weight: 800; color: var(--text-muted); }
+.buymode.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.floor-block { margin-bottom: 16px; }
+.floor-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.floor-head .fh-title { font-size: 0.85rem; font-weight: 800; }
+.floor-head .fh-mgr { font-size: 0.72rem; color: var(--text-muted); }
+
+.room-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid var(--border-strong);
+}
+.room-card.stage-basic { border-left-color: #8d8d8d; }
+.room-card.stage-renovated { border-left-color: #4f8ef7; }
+.room-card.stage-modern { border-left-color: #34d17b; }
+.room-card.stage-executive { border-left-color: #a97df5; }
+.room-card.stage-premium { border-left-color: var(--accent); background: linear-gradient(135deg, rgba(255,194,51,0.06), var(--surface)); }
+.room-card.locked { opacity: 0.85; border-style: dashed; }
+
+.room-visual {
+  font-size: 1.5rem;
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-2);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.stage-premium .room-visual { border-color: var(--accent); box-shadow: 0 0 12px rgba(255,194,51,0.3); }
+
+.upgrade-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--border);
+  margin-top: 6px;
+}
+.upgrade-row .u-name { font-size: 0.78rem; font-weight: 600; }
+.upgrade-row .u-level { font-size: 0.7rem; color: var(--text-dim); }
+
+.satisfaction-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.satisfaction-line .bar { flex: 1; }
+
+.facility-card { display: flex; gap: 10px; align-items: center; }
+.facility-card .ico { font-size: 1.6rem; width: 40px; text-align: center; }
+
+/* ————— Mapa (PRD §29) ————— */
+
+.map-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  padding: 16px 14px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.map-card .ico { font-size: 2.2rem; }
+.map-card.locked { opacity: 0.9; }
+.map-card.p-aurora { background: linear-gradient(135deg, #2a2f1d, var(--surface)); }
+.map-card.p-torre { background: linear-gradient(135deg, #14293f, var(--surface)); }
+.map-card.p-campus { background: linear-gradient(135deg, #14322a, var(--surface)); }
+.map-card .current-pin { position: absolute; top: 10px; right: 12px; }
+
+.condition-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.condition-row .bar { flex: 1; }
+
+/* ————— Contratos (PRD §21.4) ————— */
+
+.contract-card { border-left: 4px solid var(--border-strong); }
+.contract-card.available { border-left-color: var(--green); }
+.contract-card.active-here { border-left-color: var(--accent); }
+.contract-card.locked-req { border-left-color: var(--red); opacity: 0.92; }
+.contract-compare { background: var(--bg-2); border-radius: var(--radius-sm); padding: 8px 10px; margin-top: 8px; font-size: 0.8rem; }
+
+/* ————— Equipe (PRD §21.5) ————— */
+
+.manager-card { display: flex; gap: 10px; }
+.manager-avatar {
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  background: var(--bg-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  border: 2px solid var(--border-strong);
+  flex-shrink: 0;
+}
+.manager-card[data-rarity="common"] .manager-avatar { border-color: #a1a1aa; }
+.manager-card[data-rarity="uncommon"] .manager-avatar { border-color: #22c55e; }
+.manager-card[data-rarity="rare"] .manager-avatar { border-color: #3b82f6; }
+.manager-card[data-rarity="epic"] .manager-avatar { border-color: #a855f7; }
+.manager-card[data-rarity="legendary"] .manager-avatar { border-color: #f59e0b; }
+.manager-card[data-rarity="mythic"] .manager-avatar { border-color: #ef4444; }
+.manager-card[data-rarity="unique"] .manager-avatar { border-color: var(--accent); box-shadow: 0 0 12px rgba(255,194,51,0.35); }
+
+/* ————— Sede / Pesquisa (PRD §31) ————— */
+
+.research-node { border-left: 4px solid var(--border-strong); }
+.research-node.owned { border-left-color: var(--green); }
+.research-node.available { border-left-color: var(--blue); }
+.research-node.locked { opacity: 0.75; }
+
+/* ————— Metas (PRD §21.6) ————— */
+
+.mission-card { display: flex; flex-direction: column; gap: 7px; }
+.mission-card .m-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.mission-card.done-uncollected { border-color: var(--green); }
+
+.achievement-card { display: flex; gap: 10px; align-items: center; }
+.achievement-card .a-ico {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--bg-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.achievement-card.unlocked .a-ico { background: var(--accent-soft); border-color: var(--accent); }
+.achievement-card:not(.unlocked) { opacity: 0.6; }
+
+/* ————— Eventos ————— */
+
+.event-timer { height: 5px; background: var(--bg-2); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+.event-timer > span { display: block; height: 100%; background: var(--red); transition: width 1s linear; }
+.event-choice {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  margin-bottom: 8px;
+}
+.event-choice .special { color: var(--accent); font-size: 0.74rem; margin-top: 3px; display: block; }
+
+/* ————— Prestígio ————— */
+
+.prestige-req { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 0.84rem; }
+.prestige-req .ok { color: var(--green); }
+.prestige-req .no { color: var(--red); }
+.legacy-card.maxed { border-color: var(--accent); }
+
+.confirm-input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 1rem;
+  text-align: center;
+  letter-spacing: 3px;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+/* ————— Loja (PRD §21.7) ————— */
+
+.store-card { position: relative; }
+.store-card .price-pill {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.ad-btn { border-color: var(--purple); background: var(--purple-soft); color: var(--purple); }
+.mock-note { font-size: 0.68rem; color: var(--text-dim); text-align: center; margin-top: 4px; }
+
+/* ————— Coleção ————— */
+
+.collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.collection-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+.collection-item .ico { font-size: 1.6rem; }
+.collection-item.locked { opacity: 0.45; filter: grayscale(0.8); }
+.collection-item.equipped { border-color: var(--accent); background: var(--accent-soft); }
+
+/* ————— Desafios ————— */
+
+.challenge-card .medals { font-size: 0.95rem; letter-spacing: 2px; }
+.challenge-hud {
+  position: sticky;
+  top: calc(var(--header-h) + var(--safe-top));
+  z-index: 30;
+  background: var(--purple-soft);
+  border: 1px solid var(--purple);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+/* ————— Estatísticas ————— */
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+.stat-tile .v { font-size: 1.05rem; font-weight: 800; }
+.stat-tile .k { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* ————— Campanha ————— */
+
+.dialogue-line { display: flex; gap: 10px; margin-bottom: 10px; }
+.dialogue-line .who-ico { font-size: 1.5rem; }
+.dialogue-line .bubble {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px 14px 14px 14px;
+  padding: 9px 12px;
+  font-size: 0.86rem;
+}
+.dialogue-line .who-name { font-size: 0.68rem; color: var(--accent); font-weight: 800; margin-bottom: 2px; }
+
+.objective-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 0.84rem; }
+.objective-row .check { width: 20px; }
+
+/* ————— Mais ————— */
+
+.more-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 9px; }
+.more-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 10px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.82rem;
+  min-height: 84px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+}
+.more-tile .ico { font-size: 1.6rem; }
+
+/* Barra de atualização do PWA */
+.sw-banner {
+  position: fixed;
+  bottom: calc(var(--nav-h) + var(--safe-bottom) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 65;
+  background: var(--surface-2);
+  border: 1px solid var(--blue);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow);
+  width: min(94vw, 430px);
+}
+
+@media (max-width: 380px) {
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .hud-money { font-size: 1.15rem; }
+}

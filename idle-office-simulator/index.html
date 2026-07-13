@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1220">
+  <meta name="description" content="Idle Office Simulator — transforme um prédio decadente em um império corporativo. Jogo idle offline-first em português.">
+  <title>Idle Office Simulator</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/screens.css">
+</head>
+<body>
+  <noscript>
+    <div style="padding:2rem;text-align:center">O Idle Office Simulator precisa de JavaScript para funcionar.</div>
+  </noscript>
+
+  <!-- Cabeçalho fixo (PRD §21.1) -->
+  <header class="app-header" id="app-header" aria-label="Recursos do jogador"></header>
+
+  <!-- Conteúdo principal -->
+  <main class="app-main" id="app-main" tabindex="-1"></main>
+
+  <!-- Navegação inferior (PRD §21.2) -->
+  <nav class="app-nav" id="app-nav" aria-label="Navegação principal"></nav>
+
+  <!-- Camadas de sobreposição -->
+  <div class="toast-root" id="toast-root" aria-live="polite"></div>
+  <div class="modal-root" id="modal-root"></div>
+  <div class="float-root" id="float-root" aria-hidden="true"></div>
+  <div class="onboard-root" id="onboard-root"></div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

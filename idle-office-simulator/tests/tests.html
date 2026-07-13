@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Idle Office Simulator — Testes</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0d1220; color: #f2f5fb; padding: 20px; max-width: 780px; margin: 0 auto; }
+    h1 { font-size: 1.3rem; }
+    .test { padding: 7px 12px; border-radius: 8px; margin: 4px 0; font-size: 0.85rem; }
+    .pass { background: rgba(52, 209, 123, 0.12); border-left: 4px solid #34d17b; }
+    .fail { background: rgba(255, 93, 93, 0.12); border-left: 4px solid #ff5d5d; }
+    .fail pre { color: #ff9d9d; font-size: 0.75rem; white-space: pre-wrap; }
+    #summary { font-size: 1.1rem; font-weight: 800; padding: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Idle Office Simulator — Testes automatizados</h1>
+  <p>Execute a partir de um servidor estático (ex.: <code>python3 -m http.server</code>) e abra <code>tests/tests.html</code>.</p>
+  <div id="summary">Executando…</div>
+  <div id="results"></div>
+  <script type="module" src="tests.js"></script>
+</body>
+</html>
