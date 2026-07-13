@@ -1,7 +1,7 @@
 // Service worker — cache versionado, offline-first (PRD §42).
 // Atualizar CACHE_VERSION invalida o cache antigo SEM tocar no save (localStorage).
 
-const CACHE_VERSION = 'idle-office-v1.0.0';
+const CACHE_VERSION = 'idle-office-v1.1.0';
 const PRECACHE = [
   './',
   './index.html',
@@ -40,6 +40,7 @@ const PRECACHE = [
   './src/systems/challenges.js',
   './src/persistence/save.js',
   './src/ui/ui.js',
+  './src/ui/music.js',
   './src/ui/screens.js',
   './src/ui/handlers.js',
   './src/debug/panel.js',

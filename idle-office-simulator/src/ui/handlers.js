@@ -24,7 +24,7 @@ import { CHAPTERS, CHARACTERS } from '../data/campaign.js';
 import { FLOORS, floorById, propertyById } from '../data/buildings.js';
 import { managerById } from '../data/managers.js';
 import { COUNCIL_GOALS } from '../data/extras.js';
-import { ui, navigate, redraw, openModal, closeModal, closeAllModals, floatNumber, sounds, collectOffline, dialogueLine } from './ui.js';
+import { ui, navigate, redraw, openModal, closeModal, closeAllModals, floatNumber, sounds, haptic, collectOffline, dialogueLine } from './ui.js';
 
 // Globais usados por templates do ui.js/screens.js
 window.__characters = CHARACTERS;
@@ -74,6 +74,7 @@ export function handleAction(action, data, el, event) {
     case 'tap-work': {
       const gain = tapWork(state);
       sounds.tap();
+      haptic(10);
       const x = event?.clientX ?? window.innerWidth / 2;
       const y = event?.clientY ?? 200;
       floatNumber(x, y, `+${fmtMoney(gain)}`);
@@ -83,7 +84,7 @@ export function handleAction(action, data, el, event) {
     }
     case 'buy-upgrade': {
       const ok = buyUpgrade(state, data.room, data.cat, ui.buyMode === 'max' ? 'max' : Number(ui.buyMode));
-      if (ok) sounds.buy();
+      if (ok) { sounds.buy(); haptic(15); }
       break;
     }
     case 'unlock-room': unlockRoom(state, data.room); break;

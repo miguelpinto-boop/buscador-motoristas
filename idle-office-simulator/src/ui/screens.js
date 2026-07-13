@@ -34,6 +34,51 @@ function progressBar(cur, target, cls = '') {
   return `<div class="bar ${cls}"><span style="width:${pct(cur, target)}%"></span></div>`;
 }
 
+// ————— Próxima meta (PRD §40.3 — seta "próxima meta") —————
+
+function nextGoalCard(state, snap) {
+  // Prioridade: sala bloqueada mais barata do andar aberto → andar → propriedade → Prestígio
+  let goal = null;
+  const prop = state.currentProperty;
+  const lockedRooms = OFFICES
+    .filter((o) => o.property === prop && !state.rooms[o.id].unlocked && state.floors[o.floor])
+    .sort((a, b) => a.unlockCost - b.unlockCost);
+  if (lockedRooms.length) {
+    goal = { label: `Desbloquear ${lockedRooms[0].name}`, cost: lockedRooms[0].unlockCost, hint: 'nova sala = novo aluguel' };
+  } else {
+    const lockedFloor = floorsOfProperty(prop).find((f) => !state.floors[f.id]);
+    if (lockedFloor) {
+      goal = { label: `Liberar ${lockedFloor.name}`, cost: lockedFloor.cost, hint: `${lockedFloor.rep} REP + requisitos do andar` };
+    } else {
+      const nextProp = PROPERTIES.find((p) => !state.properties[p.id]);
+      if (nextProp) {
+        goal = { label: `Comprar ${nextProp.name}`, cost: nextProp.unlock.cost, hint: `capítulo ${nextProp.unlock.chapter} e ${nextProp.unlock.rep} REP` };
+      } else if (state === game.state) {
+        const preview = prestigePreview(state);
+        const okCount = preview.requirements.filter((r) => r.ok).length;
+        return `<div class="card" style="border-color:var(--accent)">
+          <div class="row between">
+            <div><h3>🎯 Próxima meta: Prestígio</h3><div class="dim">${okCount}/${preview.requirements.length} requisitos · +${fmtInt(preview.legacyPoints)} PL previstos</div></div>
+            <button class="btn small primary" data-action="nav" data-screen="prestige">Ver</button>
+          </div>
+        </div>`;
+      }
+    }
+  }
+  if (!goal) return '';
+  const pctNow = Math.min(100, Math.floor((state.balance / Math.max(1, goal.cost)) * 100));
+  return `<div class="card" style="border-color:var(--border-strong)">
+    <div class="row between">
+      <div style="flex:1">
+        <h3>🎯 Próxima meta: ${esc(goal.label)}</h3>
+        <div class="dim">${fmtMoney(goal.cost)} · ${esc(goal.hint)}</div>
+        <div class="bar green" style="margin-top:6px"><span data-goal-cost="${goal.cost}" style="width:${pctNow}%"></span></div>
+      </div>
+      <strong class="dim" data-goal-pct style="margin-left:8px">${pctNow}%</strong>
+    </div>
+  </div>`;
+}
+
 // ————— Tela PRÉDIO (PRD §21.3) —————
 
 function renderBuilding(el, state) {
@@ -56,15 +101,18 @@ function renderBuilding(el, state) {
     </div>`;
   }
 
+  const equipped = Object.values(state.collection.equipped[prop.id] || {})
+    .map((id) => collectionItemById(id)?.name).filter(Boolean);
   html += `<div class="property-banner">
     <span class="ico">${prop.icon}</span>
     <div style="flex:1">
       <h2>${esc(prop.name)}</h2>
       <div class="dim">${esc(prop.tagline)}</div>
+      ${equipped.length ? `<div class="dim">🖼️ ${equipped.map(esc).join(' · ')}</div>` : ''}
       <div class="condition-row">
         <span class="dim">Condição ${Math.round(cond)}</span>
         <div class="bar ${cond >= 80 ? 'green' : cond >= 50 ? '' : 'red'}" style="max-width:130px"><span style="width:${cond}%"></span></div>
-        ${cond < 100 ? `<button class="btn small" data-action="maintain" data-prop="${prop.id}">🔧 ${fmtMoney(maintenanceCost(snap.perProperty[prop.id] || 0, snap.mods.maintenanceDiscount))}</button>` : ''}
+        ${cond < 99.5 ? `<button class="btn small" data-action="maintain" data-prop="${prop.id}">🔧 ${fmtMoney(maintenanceCost(snap.perProperty[prop.id] || 0, snap.mods.maintenanceDiscount))}</button>` : ''}
       </div>
     </div>
     <div style="text-align:right">
@@ -74,6 +122,8 @@ function renderBuilding(el, state) {
   </div>`;
 
   html += `<button class="work-btn" data-action="tap-work" aria-label="Trabalhar para ganhar dinheiro">💼 Trabalhar</button>`;
+
+  html += nextGoalCard(state, snap);
 
   const modes = [[1, 'x1'], [10, 'x10'], ...(snap.mods.buyX25 ? [[25, 'x25']] : []), ['max', 'Máx.']];
   html += `<div class="buymode-row"><span class="label">COMPRAR:</span>${modes.map(([m, label]) =>
@@ -98,7 +148,7 @@ function renderBuilding(el, state) {
       html += `<div class="floor-block">
         <div class="floor-head">
           <span class="fh-title">🔒 ${esc(floor.name)} <span class="dim">(bônus ${floor.bonus.toFixed(2).replace('.', ',')}×)</span></span>
-          <button class="btn small ${canPay ? 'primary affordable' : ''}" data-action="unlock-floor" data-floor="${floor.id}">Liberar</button>
+          <button class="btn small ${canPay ? 'primary affordable' : ''}" data-action="unlock-floor" data-floor="${floor.id}" data-cost="${floor.cost}">Liberar</button>
         </div>
         <div class="card"><div class="dim">Requisitos: ${reqs.join(' · ')}</div></div>
       </div>`;
@@ -129,7 +179,7 @@ function renderBuilding(el, state) {
       html += `<div class="card facility-card">
         <span class="ico">${fac.icon}</span>
         <div style="flex:1"><h3>${esc(fac.name)}</h3><div class="dim">${esc(fac.desc)}</div></div>
-        <button class="btn ${state.balance >= cost ? 'primary affordable' : ''}" data-action="build-facility" data-fac="${fac.id}">${fmtMoney(cost)}</button>
+        <button class="btn ${state.balance >= cost ? 'primary affordable' : ''}" data-action="build-facility" data-fac="${fac.id}" data-cost="${cost}">${fmtMoney(cost)}</button>
       </div>`;
     } else {
       const maxed = lvl >= fac.maxLevel;
@@ -141,7 +191,7 @@ function renderBuilding(el, state) {
           <div class="dim">${esc(fac.desc)}</div>
           ${progressBar(lvl, fac.maxLevel, 'blue')}
         </div>
-        ${maxed ? '<span class="tag gold">MÁX</span>' : `<button class="btn small ${state.balance >= cost ? 'primary' : ''}" data-action="upgrade-facility" data-fac="${fac.id}">▲ ${fmtMoney(cost)}</button>`}
+        ${maxed ? '<span class="tag gold">MÁX</span>' : `<button class="btn small ${state.balance >= cost ? 'primary' : ''}" data-action="upgrade-facility" data-fac="${fac.id}" data-cost="${cost}">▲ ${fmtMoney(cost)}</button>`}
       </div>`;
     }
   }
@@ -160,7 +210,7 @@ function roomCard(state, snap, office) {
         <div class="row"><div class="room-visual">🔒</div>
           <div><h3>${esc(office.name)}</h3><div class="dim">Renda base ${fmtRate(office.baseIncome)}</div></div>
         </div>
-        <button class="btn ${canPay ? 'primary affordable' : ''}" data-action="unlock-room" data-room="${office.id}">${fmtMoney(office.unlockCost)}</button>
+        <button class="btn ${canPay ? 'primary affordable' : ''}" data-action="unlock-room" data-room="${office.id}" data-cost="${office.unlockCost}">${fmtMoney(office.unlockCost)}</button>
       </div>
     </div>`;
   }
@@ -182,7 +232,7 @@ function roomCard(state, snap, office) {
     const afford = q && q.count > 0 && state.balance >= q.total;
     return `<div class="upgrade-row">
       <div><div class="u-name">${label}</div><div class="u-level">nível ${lvl}/${office.maxLevel}</div></div>
-      <button class="btn small ${afford ? 'primary' : ''}" data-action="buy-upgrade" data-room="${office.id}" data-cat="${cat}" ${!q || q.count === 0 ? 'disabled' : ''}>
+      <button class="btn small ${afford ? 'primary' : ''}" data-action="buy-upgrade" data-room="${office.id}" data-cat="${cat}" data-cost="${q ? q.total : 0}" ${!q || q.count === 0 ? 'disabled' : ''}>
         ${q && q.count > 1 ? `+${q.count} · ` : ''}${q ? fmtMoney(q.total) : '—'}
       </button>
     </div>`;
@@ -316,10 +366,15 @@ function renderContracts(el, state) {
     return { c, check, projected };
   });
 
-  let list = rows;
-  if (ui.contractFilter === 'available') list = rows.filter((r) => r.check.ok && state.tenantsByRoom[office.id] !== r.c.id);
-  if (ui.contractFilter === 'locked') list = rows.filter((r) => !r.check.ok);
-  if (ui.contractFilter === 'best') list = rows.filter((r) => r.check.ok).sort((a, b) => b.projected - a.projected);
+  // Empresas de categorias muito acima da REP atual ficam ocultas para não poluir
+  const maxAvailableCat = Math.max(1, ...CATEGORIES.filter((c) => categoryAvailable(state, c.n)).map((c) => c.n));
+  const horizon = maxAvailableCat + 1;
+  const hiddenCount = rows.filter((r) => r.c.cat > horizon).length;
+
+  let list = rows.filter((r) => r.c.cat <= horizon);
+  if (ui.contractFilter === 'available') list = list.filter((r) => r.check.ok && state.tenantsByRoom[office.id] !== r.c.id);
+  if (ui.contractFilter === 'locked') list = list.filter((r) => !r.check.ok);
+  if (ui.contractFilter === 'best') list = list.filter((r) => r.check.ok).sort((a, b) => b.projected - a.projected);
 
   for (const { c, check, projected } of list) {
     const isCurrent = state.tenantsByRoom[office.id] === c.id;
@@ -350,6 +405,10 @@ function renderContracts(el, state) {
         <button class="btn primary block" style="margin-top:8px" data-action="sign-contract" data-room="${office.id}" data-company="${c.id}" data-worse="${worse ? '1' : ''}">Assinar contrato</button>`
     : !check.ok ? `<div class="loss small" style="margin-top:6px">🔒 ${esc(check.reason)}</div>` : ''}
     </div>`;
+  }
+
+  if (hiddenCount > 0) {
+    html += `<div class="card"><div class="dim" style="text-align:center">🔭 ${hiddenCount} empresa(s) de categorias superiores serão reveladas conforme sua Reputação crescer.</div></div>`;
   }
 
   el.innerHTML = html;
@@ -409,7 +468,7 @@ function renderTeam(el, state) {
           <div class="small ${h.level >= 5 ? '' : 'dim'}">${h.level >= 5 ? '✦' : '🔒 nv.5:'} ${managerBonusText(m.bonus5, h.level)}</div>
           <div class="dim">${assignedFloor ? `📍 ${floorById(assignedFloor)?.name} (${propertyById(floorById(assignedFloor)?.property)?.name})` : 'Sem andar designado'}</div>
           <div class="row" style="margin-top:7px">
-            ${maxed ? '<span class="tag gold">NÍVEL MÁX</span>' : `<button class="btn small ${state.balance >= trainCost ? 'primary' : ''}" data-action="train-manager" data-mgr="${m.id}">📚 Treinar ${fmtMoney(trainCost)}${repReq ? ` (${repReq} REP)` : ''}</button>`}
+            ${maxed ? '<span class="tag gold">NÍVEL MÁX</span>' : `<button class="btn small ${state.balance >= trainCost ? 'primary' : ''}" data-action="train-manager" data-mgr="${m.id}" data-cost="${trainCost}">📚 Treinar ${fmtMoney(trainCost)}${repReq ? ` (${repReq} REP)` : ''}</button>`}
             <button class="btn small" data-action="assign-manager" data-mgr="${m.id}">📍 Designar</button>
             ${assignedFloor ? `<button class="btn small ghost" data-action="unassign-manager" data-floor="${assignedFloor}">Remover</button>` : ''}
           </div>
@@ -429,7 +488,7 @@ function renderTeam(el, state) {
           <div class="dim">${esc(m.title)}</div>
           <div class="small">✦ ${managerBonusText(m.bonus, 1)}</div>
           <div class="small dim">🔒 nv.5: ${managerBonusText(m.bonus5, 5)}</div>
-          <button class="btn ${state.balance >= cost ? 'primary affordable' : ''} block" style="margin-top:7px" data-action="hire-manager" data-mgr="${m.id}">Contratar — ${fmtMoney(cost)}</button>
+          <button class="btn ${state.balance >= cost ? 'primary affordable' : ''} block" style="margin-top:7px" data-action="hire-manager" data-mgr="${m.id}" data-cost="${cost}">Contratar — ${fmtMoney(cost)}</button>
         </div>
       </div>`;
     }
@@ -511,7 +570,7 @@ function renderHq(el, state) {
         <div class="dim">${esc(dept.desc)}</div>
         ${progressBar(lvl, dept.maxLevel, 'blue')}
       </div>
-      ${maxed ? '<span class="tag gold">MÁX</span>' : `<button class="btn small ${state.balance >= cost ? 'primary' : ''}" data-action="hq-upgrade" data-dept="${dept.id}">▲ ${fmtMoney(cost)}</button>`}
+      ${maxed ? '<span class="tag gold">MÁX</span>' : `<button class="btn small ${state.balance >= cost ? 'primary' : ''}" data-action="hq-upgrade" data-dept="${dept.id}" data-cost="${cost}">▲ ${fmtMoney(cost)}</button>`}
     </div>`;
   }
 
@@ -1040,6 +1099,8 @@ function renderSettings(el, state) {
 
   let html = '<div class="section-title">Preferências</div>';
   html += toggle('sound', '🔊 Efeitos sonoros', 'Sons de compra, missão e celebração', s.sound);
+  html += toggle('music', '🎵 Música ambiente', 'Trilha suave, diferente em cada propriedade', s.music);
+  html += toggle('haptics', '📳 Vibração', 'Resposta tátil ao trabalhar e comprar (celular)', s.haptics);
   html += toggle('reducedMotion', '🎬 Reduzir animações', 'Modo econômico de animação', s.reducedMotion);
   const automation = game.snapshot?.mods?.automation;
   if (automation) {

@@ -8,6 +8,7 @@ import { tapGain } from '../core/formulas.js';
 import { BALANCE } from '../data/balance.js';
 import { SCREENS, SCREEN_META, renderScreen } from './screens.js';
 import { handleAction } from './handlers.js';
+import { initMusic } from './music.js';
 import { eventById } from '../data/events.js';
 import { collectOfflineReturn } from '../systems/offline.js';
 import { playMockAd } from '../systems/monetization.js';
@@ -44,6 +45,12 @@ function beep(freq = 660, duration = 0.07, type = 'sine', volume = 0.04) {
     osc.start();
     osc.stop(audioCtx.currentTime + duration);
   } catch { /* áudio indisponível */ }
+}
+
+/** Vibração háptica leve em celulares (desligável nas configurações). */
+export function haptic(ms = 10) {
+  if (!game.state?.settings.haptics) return;
+  try { navigator.vibrate?.(ms); } catch { /* sem suporte */ }
 }
 
 export const sounds = {
@@ -214,6 +221,22 @@ function lightUpdate() {
     const pct = Math.min(100, Math.max(0, ((Date.now() - start) / Math.max(1, end - start)) * 100));
     el.style.width = `${pct}%`;
   });
+  // Botões de compra "acendem" em tempo real quando o saldo alcança o custo
+  document.querySelectorAll('[data-cost]').forEach((btn) => {
+    const cost = Number(btn.dataset.cost);
+    if (!Number.isFinite(cost) || btn.disabled) return;
+    const affordable = state.balance >= cost;
+    btn.classList.toggle('primary', affordable);
+    btn.classList.toggle('affordable', affordable);
+  });
+  // Barra de progresso da "Próxima meta"
+  const goalBar = document.querySelector('[data-goal-cost]');
+  if (goalBar) {
+    const cost = Number(goalBar.dataset.goalCost);
+    goalBar.style.width = `${Math.min(100, (state.balance / Math.max(1, cost)) * 100)}%`;
+    const goalPct = document.querySelector('[data-goal-pct]');
+    if (goalPct) goalPct.textContent = `${Math.min(100, Math.floor((state.balance / Math.max(1, cost)) * 100))}%`;
+  }
   // Cronômetro do evento pendente
   if (ui.eventModalEl && state.events.pending) {
     const barEl = ui.eventModalEl.querySelector('.event-timer > span');
@@ -414,6 +437,7 @@ function showSwUpdateBanner(reg) {
 export function initUI() {
   renderNav();
   redraw();
+  initMusic();
 
   // Delegação de cliques: um único listener para toda a interface
   document.addEventListener('click', (e) => {

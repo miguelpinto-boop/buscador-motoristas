@@ -162,7 +162,7 @@ export function freshState(now = Date.now()) {
     // Sessão / interface
     onboarding: { step: 0, done: false },
     settings: {
-      sound: true, music: true, reducedMotion: false, autoBuy: false,
+      sound: true, music: true, haptics: true, reducedMotion: false, autoBuy: false,
       autoCollectMissions: false, reserveMoney: 0, helpSeen: [],
     },
     offlineLimitHours: BALANCE.offlineLimitHoursDefault,
